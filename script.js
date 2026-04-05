@@ -26,7 +26,7 @@ const elements = {
   datasetStatus: document.getElementById("dataset-status"),
   progressLabel: document.getElementById("progress-label"),
   progressBar: document.getElementById("progress-bar"),
-  answeredCount: document.getElementById("answered-count"),
+  headerTimer: document.getElementById("header-timer"),
   questionPanel: document.getElementById("question-panel"),
   introPanel: document.getElementById("intro-panel"),
   resultsPanel: document.getElementById("results-panel"),
@@ -34,7 +34,6 @@ const elements = {
   questionTitle: document.getElementById("question-title"),
   questionIndex: document.getElementById("question-index"),
   questionMode: document.getElementById("question-mode"),
-  timerBadge: document.getElementById("timer-badge"),
   questionForm: document.getElementById("question-form"),
   feedback: document.getElementById("question-feedback"),
   scoreLabel: document.getElementById("score-label"),
@@ -154,7 +153,6 @@ function updateHeaderStats() {
   elements.totalCategories.textContent = String(categories.length);
   elements.readyQuestions.textContent = String(configuredCount);
   elements.configuredLabel.textContent = String(configuredCount);
-  elements.answeredCount.textContent = String(answeredCount);
   elements.savedLabel.textContent = String(answeredCount);
   elements.scoreLabel.textContent = `${score.correct} / ${score.total}`;
   elements.progressLabel.textContent =
@@ -210,7 +208,7 @@ function clearTimer() {
 function updateTimerBadge() {
   const minutes = String(Math.floor(state.remainingSeconds / 60)).padStart(2, "0");
   const seconds = String(state.remainingSeconds % 60).padStart(2, "0");
-  elements.timerBadge.textContent = `${minutes}:${seconds}`;
+  elements.headerTimer.textContent = `${minutes}:${seconds}`;
 }
 
 function getCorrectAnswersText(question) {
