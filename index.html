@@ -33,6 +33,7 @@
             <button id="jump-first-incomplete" class="button button-secondary" type="button">
               Aller à la suite
             </button>
+            <a class="button button-ghost button-link" href="about.html">À propos et sources</a>
           </div>
         </div>
         <div class="hero-meta">
@@ -60,8 +61,11 @@
           <div class="sidebar-block sidebar-note">
             <p class="sidebar-label">État des données</p>
             <p id="dataset-status">
-              Les questions sont chargées avec 4 réponses placeholders. Remplace-les dans
-              <code>questions.js</code> pour activer la correction réelle.
+              Les questions sont chargées à partir des fichiers de thèmes et des fichiers
+              de corrections. Complète <code>data/overrides/</code> pour ajuster les réponses.
+            </p>
+            <p class="sidebar-link">
+              <a href="about.html">Voir la méthode et toutes les références utilisées</a>
             </p>
           </div>
         </aside>
@@ -130,6 +134,16 @@
       </main>
     </div>
 
+    <script src="data/themes/principes-et-valeurs.js"></script>
+    <script src="data/themes/systeme-institutionnel.js"></script>
+    <script src="data/themes/droits-et-devoirs.js"></script>
+    <script src="data/themes/histoire-geographie-culture.js"></script>
+    <script src="data/themes/vivre-en-france.js"></script>
+    <script src="data/overrides/principes-et-valeurs.js"></script>
+    <script src="data/overrides/systeme-institutionnel.js"></script>
+    <script src="data/overrides/droits-et-devoirs.js"></script>
+    <script src="data/overrides/histoire-geographie-culture.js"></script>
+    <script src="data/overrides/vivre-en-france.js"></script>
     <script src="questions.js"></script>
     <script src="script.js"></script>
   </body>

@@ -106,7 +106,7 @@ function updateHeaderStats() {
   elements.datasetStatus.textContent =
     configuredCount === quizQuestions.length
       ? "Toutes les questions sont configurées avec réponses et correction."
-      : `${configuredCount} question(s) prête(s) à corriger sur ${quizQuestions.length}. Modifie questions.js pour remplacer les placeholders et définir correctAnswers.`;
+      : `${configuredCount} question(s) prête(s) à corriger sur ${quizQuestions.length}. Modifie les fichiers dans data/themes/ et data/overrides/ pour compléter les placeholders et définir correctAnswers.`;
 }
 
 function renderCategoryList() {
@@ -206,7 +206,7 @@ function showFeedback(question) {
   if (!configured) {
     elements.feedback.classList.add("is-warning");
     elements.feedback.textContent =
-      "Cette question est bien intégrée dans l’interface, mais ses 4 propositions et ses bonnes réponses restent à compléter dans questions.js.";
+      "Cette question est bien intégrée dans l’interface, mais ses 4 propositions et ses bonnes réponses restent à compléter dans data/overrides/.";
     return;
   }
 

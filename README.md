@@ -6,7 +6,9 @@ Site statique prêt pour GitHub Pages.
 
 - `index.html` : structure de la page
 - `styles.css` : interface et responsive
-- `questions.js` : banque de questions
+- `data/themes/` : un fichier de questions par thème
+- `data/overrides/` : réponses et corrections rédigées
+- `questions.js` : agrégation, placeholders et mélange aléatoire
 - `script.js` : logique du questionnaire
 
 ## Publication sur GitHub Pages
@@ -18,14 +20,14 @@ Site statique prêt pour GitHub Pages.
 
 ## Compléter les réponses
 
-Les questions sont déjà chargées, mais les réponses affichées sont des placeholders.
+Les questions sont réparties par thème dans `data/themes/`.
 
-Dans `questions.js`, complète l’objet `questionOverrides`.
+Les réponses rédigées et les corrections sont à placer dans `data/overrides/`.
 
 Exemple :
 
 ```js
-const questionOverrides = {
+Object.assign(window.questionOverrides, {
   "À quoi correspond la date du 14 juillet ?": {
     choices: [
       "À la prise de la Bastille en 1789",
@@ -36,7 +38,7 @@ const questionOverrides = {
     correctAnswers: [0],
     explanation: "Le 14 juillet commémore notamment la prise de la Bastille.",
   },
-};
+});
 ```
 
 Pour une question à plusieurs bonnes réponses :
