@@ -1,13 +1,15 @@
 :root {
-  --bg: #f4efe7;
-  --paper: rgba(251, 247, 240, 0.9);
-  --ink: #1f2430;
-  --muted: #58606f;
-  --line: rgba(31, 36, 48, 0.1);
-  --accent: #0c5c4c;
-  --accent-strong: #073a31;
-  --warn: #b55d27;
-  --shadow: 0 24px 80px rgba(29, 34, 45, 0.12);
+  --bg: #eef3fb;
+  --paper: rgba(255, 255, 255, 0.92);
+  --ink: #16233b;
+  --muted: #53627d;
+  --line: rgba(22, 35, 59, 0.12);
+  --accent: #0a4db3;
+  --accent-strong: #07357c;
+  --accent-soft: rgba(10, 77, 179, 0.1);
+  --danger: #c92a3d;
+  --danger-soft: rgba(201, 42, 61, 0.1);
+  --shadow: 0 24px 80px rgba(18, 31, 56, 0.12);
 }
 
 * {
@@ -23,9 +25,9 @@ body {
   min-height: 100vh;
   color: var(--ink);
   background:
-    radial-gradient(circle at top left, rgba(12, 92, 76, 0.15), transparent 28%),
-    radial-gradient(circle at right 15%, rgba(181, 93, 39, 0.16), transparent 24%),
-    linear-gradient(180deg, #f7f1e7 0%, #efe7da 100%);
+    radial-gradient(circle at top left, rgba(10, 77, 179, 0.18), transparent 28%),
+    radial-gradient(circle at right 16%, rgba(201, 42, 61, 0.16), transparent 24%),
+    linear-gradient(180deg, #f6f9ff 0%, #edf3ff 48%, #ffffff 100%);
   font-family: "Manrope", sans-serif;
 }
 
@@ -49,8 +51,8 @@ input {
   border: 1px solid rgba(255, 255, 255, 0.45);
   border-radius: 32px;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.42)),
-    linear-gradient(160deg, rgba(7, 58, 49, 0.08), rgba(181, 93, 39, 0.06));
+    linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.6)),
+    linear-gradient(120deg, rgba(10, 77, 179, 0.1), rgba(255, 255, 255, 0.04) 42%, rgba(201, 42, 61, 0.1));
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px);
 }
@@ -160,7 +162,7 @@ input {
   padding: 14px 16px;
   border: 1px solid transparent;
   border-radius: 16px;
-  background: rgba(12, 92, 76, 0.06);
+  background: rgba(10, 77, 179, 0.06);
   color: var(--ink);
   cursor: pointer;
   transition:
@@ -172,8 +174,8 @@ input {
 .category-button:hover,
 .category-button:focus-visible {
   transform: translateX(4px);
-  background: rgba(12, 92, 76, 0.12);
-  border-color: rgba(12, 92, 76, 0.24);
+  background: rgba(10, 77, 179, 0.12);
+  border-color: rgba(10, 77, 179, 0.24);
 }
 
 .category-button.is-active {
@@ -206,7 +208,7 @@ input {
   width: 0;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), #33a38c);
+  background: linear-gradient(90deg, var(--accent), #ffffff 52%, var(--danger));
   transition: width 220ms ease;
 }
 
@@ -244,14 +246,14 @@ input {
   min-height: 38px;
   padding: 0 14px;
   border-radius: 999px;
-  background: rgba(12, 92, 76, 0.12);
+  background: rgba(10, 77, 179, 0.12);
   color: var(--accent-strong);
   font-weight: 700;
 }
 
 .badge-muted {
-  background: rgba(181, 93, 39, 0.14);
-  color: #8e4718;
+  background: rgba(201, 42, 61, 0.12);
+  color: #9f2030;
 }
 
 .answers {
@@ -280,7 +282,7 @@ input {
 .answer-option:hover,
 .answer-option:focus-within {
   transform: translateY(-2px);
-  border-color: rgba(12, 92, 76, 0.26);
+  border-color: rgba(10, 77, 179, 0.26);
   background: rgba(255, 255, 255, 0.9);
 }
 
@@ -298,7 +300,7 @@ input {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: rgba(12, 92, 76, 0.1);
+  background: rgba(10, 77, 179, 0.1);
   font-weight: 800;
   color: var(--accent-strong);
 }
@@ -308,13 +310,13 @@ input {
 }
 
 .answer-option.is-correct {
-  border-color: rgba(12, 92, 76, 0.46);
-  background: rgba(12, 92, 76, 0.1);
+  border-color: rgba(10, 77, 179, 0.46);
+  background: rgba(10, 77, 179, 0.1);
 }
 
 .answer-option.is-wrong {
-  border-color: rgba(181, 93, 39, 0.46);
-  background: rgba(181, 93, 39, 0.08);
+  border-color: rgba(201, 42, 61, 0.46);
+  background: rgba(201, 42, 61, 0.08);
 }
 
 .feedback {
@@ -323,11 +325,11 @@ input {
   border-radius: 18px;
   line-height: 1.6;
   color: var(--ink);
-  background: rgba(12, 92, 76, 0.08);
+  background: rgba(10, 77, 179, 0.08);
 }
 
 .feedback.is-warning {
-  background: rgba(181, 93, 39, 0.12);
+  background: rgba(201, 42, 61, 0.12);
 }
 
 .question-footer {
@@ -367,7 +369,7 @@ input {
 
 .button-secondary {
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.74);
   border-color: var(--line);
 }
 
@@ -389,7 +391,7 @@ input {
 code {
   padding: 0.16rem 0.4rem;
   border-radius: 8px;
-  background: rgba(31, 36, 48, 0.08);
+  background: rgba(10, 77, 179, 0.08);
   font-family: "SFMono-Regular", Consolas, monospace;
   font-size: 0.92em;
 }
