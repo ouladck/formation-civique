@@ -1,9 +1,21 @@
-const quizQuestions = window.quizQuestions ?? [];
+const allQuizQuestions = window.quizQuestions ?? [];
+
+const EXAM_THEME_COUNT = 8;
+const QUESTION_TIME_LIMIT = 6;
+const EXAM_TOTAL = 40;
+const EXAM_PASS = 32;
 
 const state = {
+  allQuestions: allQuizQuestions.filter(isConfigured),
+  activeQuestions: [],
   currentIndex: 0,
   selections: new Map(),
-  checkedQuestions: new Set(),
+  evaluations: new Map(),
+  quizMode: "exam",
+  timerId: null,
+  remainingSeconds: QUESTION_TIME_LIMIT,
+  started: false,
+  finished: false,
 };
 
 const elements = {
@@ -15,20 +27,33 @@ const elements = {
   progressLabel: document.getElementById("progress-label"),
   progressBar: document.getElementById("progress-bar"),
   answeredCount: document.getElementById("answered-count"),
+  questionPanel: document.getElementById("question-panel"),
+  introPanel: document.getElementById("intro-panel"),
+  resultsPanel: document.getElementById("results-panel"),
   questionCategory: document.getElementById("question-category"),
   questionTitle: document.getElementById("question-title"),
   questionIndex: document.getElementById("question-index"),
   questionMode: document.getElementById("question-mode"),
+  timerBadge: document.getElementById("timer-badge"),
   questionForm: document.getElementById("question-form"),
   feedback: document.getElementById("question-feedback"),
   scoreLabel: document.getElementById("score-label"),
   configuredLabel: document.getElementById("configured-label"),
   savedLabel: document.getElementById("saved-label"),
-  prevButton: document.getElementById("prev-question"),
-  nextButton: document.getElementById("next-question"),
-  checkButton: document.getElementById("check-answer"),
+  submitButton: document.getElementById("submit-answer"),
+  skipButton: document.getElementById("skip-question"),
   restartButton: document.getElementById("start-over"),
-  jumpButton: document.getElementById("jump-first-incomplete"),
+  startQuizButton: document.getElementById("start-quiz"),
+  modePicker: document.getElementById("mode-picker"),
+  passTarget: document.getElementById("pass-target"),
+  resultsTitle: document.getElementById("results-title"),
+  resultsStatus: document.getElementById("results-status"),
+  resultsScore: document.getElementById("results-score"),
+  resultsScoreLarge: document.getElementById("results-score-large"),
+  resultsTarget: document.getElementById("results-target"),
+  resultsMissed: document.getElementById("results-missed"),
+  resultsSummary: document.getElementById("results-summary"),
+  mistakesList: document.getElementById("mistakes-list"),
 };
 
 const letters = ["A", "B", "C", "D"];
@@ -43,10 +68,10 @@ function isConfigured(question) {
   );
 }
 
-function getCategories() {
+function getCategories(questions = state.activeQuestions.length > 0 ? state.activeQuestions : state.allQuestions) {
   const counts = new Map();
 
-  quizQuestions.forEach((question) => {
+  questions.forEach((question) => {
     counts.set(question.category, (counts.get(question.category) ?? 0) + 1);
   });
 
@@ -54,7 +79,7 @@ function getCategories() {
 }
 
 function getQuestion(index) {
-  return quizQuestions[index];
+  return state.activeQuestions[index];
 }
 
 function getSelections(questionId) {
@@ -73,40 +98,76 @@ function arraysEqual(left, right) {
   return left.every((value, index) => value === right[index]);
 }
 
-function computeScore() {
-  const configuredQuestions = quizQuestions.filter(isConfigured);
-  const correct = configuredQuestions.filter((question) => {
-    const selected = [...getSelections(question.id)].sort((a, b) => a - b);
-    const expected = [...question.correctAnswers].sort((a, b) => a - b);
+function shuffleArray(items) {
+  const next = [...items];
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+  }
+  return next;
+}
 
-    return arraysEqual(selected, expected);
+function selectQuestionsByMode(mode) {
+  if (mode === "all") {
+    return shuffleArray(state.allQuestions);
+  }
+
+  const grouped = new Map();
+
+  state.allQuestions.forEach((question) => {
+    const bucket = grouped.get(question.category) ?? [];
+    bucket.push(question);
+    grouped.set(question.category, bucket);
+  });
+
+  return shuffleArray(
+    [...grouped.entries()].flatMap(([, questions]) =>
+      shuffleArray(questions).slice(0, EXAM_THEME_COUNT)
+    )
+  );
+}
+
+function getPassThreshold(total) {
+  return total === EXAM_TOTAL ? EXAM_PASS : Math.ceil(total * 0.8);
+}
+
+function computeScore() {
+  const correct = state.activeQuestions.filter((question) => {
+    const evaluation = state.evaluations.get(question.id);
+    return evaluation?.isCorrect;
   });
 
   return {
     correct: correct.length,
-    total: configuredQuestions.length,
+    total: state.activeQuestions.length,
   };
 }
 
 function updateHeaderStats() {
   const categories = getCategories();
-  const configuredCount = quizQuestions.filter(isConfigured).length;
-  const answeredCount = [...state.selections.values()].filter((value) => value.length > 0).length;
+  const configuredCount = state.allQuestions.length;
+  const answeredCount = state.evaluations.size;
   const score = computeScore();
+  const total = state.activeQuestions.length || (state.quizMode === "exam" ? EXAM_TOTAL : state.allQuestions.length);
 
-  elements.totalQuestions.textContent = String(quizQuestions.length);
+  elements.totalQuestions.textContent = String(total);
   elements.totalCategories.textContent = String(categories.length);
   elements.readyQuestions.textContent = String(configuredCount);
   elements.configuredLabel.textContent = String(configuredCount);
   elements.answeredCount.textContent = String(answeredCount);
   elements.savedLabel.textContent = String(answeredCount);
   elements.scoreLabel.textContent = `${score.correct} / ${score.total}`;
-  elements.progressLabel.textContent = `${state.currentIndex + 1} / ${quizQuestions.length}`;
-  elements.progressBar.style.width = `${((state.currentIndex + 1) / quizQuestions.length) * 100}%`;
-  elements.datasetStatus.textContent =
-    configuredCount === quizQuestions.length
-      ? "Toutes les questions sont configurées avec réponses et correction."
-      : `${configuredCount} question(s) prête(s) à corriger sur ${quizQuestions.length}. Modifie les fichiers dans data/themes/ et data/overrides/ pour compléter les placeholders et définir correctAnswers.`;
+  elements.progressLabel.textContent =
+    state.started && !state.finished ? `${state.currentIndex + 1} / ${state.activeQuestions.length}` : `0 / ${total}`;
+  elements.progressBar.style.width =
+    state.started && state.activeQuestions.length > 0
+      ? `${((state.currentIndex + (state.finished ? 1 : 0)) / state.activeQuestions.length) * 100}%`
+      : "0%";
+  elements.datasetStatus.textContent = `${configuredCount} question(s) sont prêtes. Le mode examen prend par défaut 8 questions par thème, soit 40 au total.`;
+  elements.passTarget.textContent =
+    state.quizMode === "exam"
+      ? `Objectif ${EXAM_PASS} / ${EXAM_TOTAL}`
+      : `Objectif ${getPassThreshold(total)} / ${total}`;
 }
 
 function renderCategoryList() {
@@ -115,35 +176,59 @@ function renderCategoryList() {
   elements.categoryList.innerHTML = "";
 
   categories.forEach((category) => {
-    const button = document.createElement("button");
-    const firstIndex = quizQuestions.findIndex((question) => question.category === category.name);
-
-    button.type = "button";
-    button.className = "category-button";
-    if (getQuestion(state.currentIndex)?.category === category.name) {
-      button.classList.add("is-active");
+    const badge = document.createElement("div");
+    badge.className = "category-button";
+    if (getQuestion(state.currentIndex)?.category === category.name && state.started && !state.finished) {
+      badge.classList.add("is-active");
     }
 
-    button.innerHTML = `<span>${category.name}</span><strong>${category.count}</strong>`;
-    button.addEventListener("click", () => {
-      state.currentIndex = firstIndex;
-      render();
-    });
-
-    elements.categoryList.appendChild(button);
+    badge.innerHTML = `<span>${category.name}</span><strong>${category.count}</strong>`;
+    elements.categoryList.appendChild(badge);
   });
+}
+
+function startTimer() {
+  clearTimer();
+  state.remainingSeconds = QUESTION_TIME_LIMIT;
+  updateTimerBadge();
+  state.timerId = window.setInterval(() => {
+    state.remainingSeconds -= 1;
+    updateTimerBadge();
+    if (state.remainingSeconds <= 0) {
+      finalizeQuestion("timeout");
+    }
+  }, 1000);
+}
+
+function clearTimer() {
+  if (state.timerId) {
+    window.clearInterval(state.timerId);
+    state.timerId = null;
+  }
+}
+
+function updateTimerBadge() {
+  elements.timerBadge.textContent = `${state.remainingSeconds} s`;
+}
+
+function getCorrectAnswersText(question) {
+  return question.correctAnswers
+    .map((index) => `${letters[index]} - ${question.choices[index]}`)
+    .join(" | ");
 }
 
 function renderQuestion() {
   const question = getQuestion(state.currentIndex);
+  if (!question) {
+    return;
+  }
   const selected = getSelections(question.id);
-  const configured = isConfigured(question);
-  const hasChecked = state.checkedQuestions.has(question.id);
 
   elements.questionCategory.textContent = question.category;
   elements.questionTitle.textContent = question.prompt;
   elements.questionIndex.textContent = `Question ${state.currentIndex + 1}`;
-  elements.questionMode.textContent = configured ? "Correction active" : "À compléter";
+  elements.questionMode.textContent =
+    question.correctAnswers.length > 1 ? "Plusieurs réponses possibles" : "Une seule ou plusieurs réponses";
   elements.questionForm.innerHTML = "";
 
   question.choices.forEach((choice, index) => {
@@ -172,16 +257,6 @@ function renderQuestion() {
       updateHeaderStats();
     });
 
-    if (hasChecked && configured) {
-      const isCorrect = question.correctAnswers.includes(index);
-      const isWrongSelection = isSelected && !isCorrect;
-      if (isCorrect) {
-        label.classList.add("is-correct");
-      } else if (isWrongSelection) {
-        label.classList.add("is-wrong");
-      }
-    }
-
     label.append(input, marker, text);
     elements.questionForm.appendChild(label);
   });
@@ -189,72 +264,156 @@ function renderQuestion() {
   elements.feedback.hidden = true;
   elements.feedback.classList.remove("is-warning");
 
-  if (hasChecked) {
-    showFeedback(question);
-  }
-
-  elements.prevButton.disabled = state.currentIndex === 0;
-  elements.nextButton.disabled = state.currentIndex === quizQuestions.length - 1;
+  updateTimerBadge();
 }
 
-function showFeedback(question) {
-  const configured = isConfigured(question);
-  const selected = [...getSelections(question.id)].sort((a, b) => a - b);
+function showResults() {
+  const score = computeScore();
+  const target = getPassThreshold(score.total);
+  const passed = score.correct >= target;
+  const wrongQuestions = state.activeQuestions.filter((question) => {
+    const evaluation = state.evaluations.get(question.id);
+    return evaluation && !evaluation.isCorrect;
+  });
 
-  elements.feedback.hidden = false;
+  elements.introPanel.hidden = true;
+  elements.questionPanel.hidden = true;
+  elements.resultsPanel.hidden = false;
+  elements.resultsStatus.textContent = passed ? "Réussi" : "Raté";
+  elements.resultsStatus.classList.toggle("badge-success", passed);
+  elements.resultsStatus.classList.toggle("badge-danger", !passed);
+  elements.resultsScore.textContent = `${score.correct} / ${score.total}`;
+  elements.resultsScoreLarge.textContent = `${score.correct} / ${score.total}`;
+  elements.resultsTarget.textContent = `${target}`;
+  elements.resultsMissed.textContent = `${wrongQuestions.length}`;
+  elements.resultsSummary.textContent = passed
+    ? `Résultat validé. Tu as obtenu ${score.correct} bonnes réponses sur ${score.total}.`
+    : `Résultat insuffisant. Il faut au moins ${target} bonnes réponses sur ${score.total}.`;
 
-  if (!configured) {
-    elements.feedback.classList.add("is-warning");
-    elements.feedback.textContent =
-      "Cette question est bien intégrée dans l’interface, mais ses 4 propositions et ses bonnes réponses restent à compléter dans data/overrides/.";
+  elements.mistakesList.innerHTML = "";
+
+  if (wrongQuestions.length === 0) {
+    const item = document.createElement("div");
+    item.className = "mistake-item";
+    item.innerHTML = "<strong>Aucune erreur</strong><p>Toutes les réponses sont correctes.</p>";
+    elements.mistakesList.appendChild(item);
     return;
   }
 
-  const expected = [...question.correctAnswers].sort((a, b) => a - b);
-  const success = arraysEqual(selected, expected);
-  elements.feedback.classList.toggle("is-warning", !success);
-  elements.feedback.textContent = success
-    ? question.explanation || "Bonne réponse."
-    : question.explanation || "Réponse incorrecte. Vérifie les choix attendus.";
+  wrongQuestions.forEach((question) => {
+    const evaluation = state.evaluations.get(question.id);
+    const userAnswer =
+      evaluation.selected.length > 0
+        ? evaluation.selected.map((index) => `${letters[index]} - ${question.choices[index]}`).join(" | ")
+        : "Aucune réponse";
+    const item = document.createElement("div");
+    item.className = "mistake-item";
+    item.innerHTML = `
+      <strong>${question.prompt}</strong>
+      <p><span>Ta réponse :</span> ${userAnswer}</p>
+      <p><span>Bonne réponse :</span> ${getCorrectAnswersText(question)}</p>
+      <p><span>Explication :</span> ${question.explanation}</p>
+    `;
+    elements.mistakesList.appendChild(item);
+  });
 }
 
-function render() {
+function finishQuiz() {
+  clearTimer();
+  state.finished = true;
+  updateHeaderStats();
+  showResults();
+}
+
+function finalizeQuestion(reason = "submit") {
+  if (state.finished || !state.started) {
+    return;
+  }
+
+  clearTimer();
+
+  const question = getQuestion(state.currentIndex);
+  const selected = [...getSelections(question.id)].sort((a, b) => a - b);
+  const expected = [...question.correctAnswers].sort((a, b) => a - b);
+  const isCorrect = reason !== "timeout" && arraysEqual(selected, expected);
+
+  state.evaluations.set(question.id, {
+    selected,
+    expected,
+    isCorrect,
+    reason,
+  });
+
+  if (state.currentIndex >= state.activeQuestions.length - 1) {
+    finishQuiz();
+    return;
+  }
+
+  state.currentIndex += 1;
+  updateHeaderStats();
+  renderQuestion();
+  startTimer();
+}
+
+function startQuiz() {
+  clearTimer();
+  state.quizMode =
+    elements.modePicker.querySelector('input[name="quiz-mode"]:checked')?.value ?? "exam";
+  state.activeQuestions = selectQuestionsByMode(state.quizMode);
+  state.currentIndex = 0;
+  state.selections.clear();
+  state.evaluations.clear();
+  state.started = true;
+  state.finished = false;
+  elements.introPanel.hidden = true;
+  elements.resultsPanel.hidden = true;
+  elements.questionPanel.hidden = false;
   renderCategoryList();
   updateHeaderStats();
   renderQuestion();
+  startTimer();
 }
 
-elements.prevButton.addEventListener("click", () => {
-  state.currentIndex = Math.max(0, state.currentIndex - 1);
-  render();
-});
-
-elements.nextButton.addEventListener("click", () => {
-  state.currentIndex = Math.min(quizQuestions.length - 1, state.currentIndex + 1);
-  render();
-});
-
-elements.checkButton.addEventListener("click", () => {
-  const question = getQuestion(state.currentIndex);
-  state.checkedQuestions.add(question.id);
-  renderQuestion();
+function resetToIntro() {
+  clearTimer();
+  state.activeQuestions = [];
+  state.currentIndex = 0;
+  state.selections.clear();
+  state.evaluations.clear();
+  state.started = false;
+  state.finished = false;
+  elements.questionPanel.hidden = true;
+  elements.resultsPanel.hidden = true;
+  elements.introPanel.hidden = false;
+  renderCategoryList();
   updateHeaderStats();
+}
+
+function renderIntro() {
+  renderCategoryList();
+  updateHeaderStats();
+}
+
+elements.submitButton.addEventListener("click", () => {
+  finalizeQuestion("submit");
+});
+
+elements.skipButton.addEventListener("click", () => {
+  finalizeQuestion("skip");
 });
 
 elements.restartButton.addEventListener("click", () => {
-  state.currentIndex = 0;
-  state.selections.clear();
-  state.checkedQuestions.clear();
-  render();
+  resetToIntro();
 });
 
-elements.jumpButton.addEventListener("click", () => {
-  const nextIndex = quizQuestions.findIndex(
-    (question) => getSelections(question.id).length === 0
-  );
-
-  state.currentIndex = nextIndex >= 0 ? nextIndex : 0;
-  render();
+elements.startQuizButton.addEventListener("click", () => {
+  startQuiz();
 });
 
-render();
+elements.modePicker.addEventListener("change", () => {
+  state.quizMode =
+    elements.modePicker.querySelector('input[name="quiz-mode"]:checked')?.value ?? "exam";
+  renderIntro();
+});
+
+resetToIntro();

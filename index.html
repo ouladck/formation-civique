@@ -27,10 +27,10 @@
           </p>
           <div class="hero-actions">
             <button id="start-over" class="button button-primary" type="button">
-              Recommencer
+              Nouveau test
             </button>
-            <button id="jump-first-incomplete" class="button button-secondary" type="button">
-              Aller à la suite
+            <button id="start-quiz" class="button button-secondary" type="button">
+              Lancer le quiz
             </button>
             <a class="button button-ghost button-link" href="about.html">À propos et sources</a>
           </div>
@@ -54,7 +54,26 @@
       <main class="app-layout">
         <aside class="sidebar" aria-label="Thèmes du questionnaire">
           <div class="sidebar-block">
-            <p class="sidebar-label">Thèmes</p>
+            <p class="sidebar-label">Mode de quiz</p>
+            <div class="mode-picker" id="mode-picker">
+              <label class="mode-option">
+                <input type="radio" name="quiz-mode" value="exam" checked />
+                <span>
+                  <strong>40 questions aléatoires</strong>
+                  <small>8 questions par thème, seuil de réussite à 32/40</small>
+                </span>
+              </label>
+              <label class="mode-option">
+                <input type="radio" name="quiz-mode" value="all" />
+                <span>
+                  <strong>Toutes les questions</strong>
+                  <small>Parcourir l’ensemble du questionnaire</small>
+                </span>
+              </label>
+            </div>
+          </div>
+          <div class="sidebar-block">
+            <p class="sidebar-label">Répartition</p>
             <nav id="category-list" class="category-list"></nav>
           </div>
           <div class="sidebar-block sidebar-note">
@@ -84,7 +103,30 @@
             </div>
           </div>
 
-          <article class="question-panel">
+          <section id="intro-panel" class="question-panel exam-panel">
+            <div class="question-header">
+              <div>
+                <p class="question-category">Mode examen</p>
+                <h2>Quiz chronométré</h2>
+              </div>
+              <div class="question-badges">
+                <span class="badge">6 secondes / question</span>
+                <span id="pass-target" class="badge badge-muted">Objectif 32 / 40</span>
+              </div>
+            </div>
+            <div class="intro-copy">
+              <p>
+                Par défaut, le quiz sélectionne 40 questions aléatoires, soit 8 par thème.
+                Si le temps expire, la question est comptée comme ratée et le quiz passe à la suivante.
+              </p>
+              <p>
+                À la fin, tu obtiens le score final, le statut de réussite et la liste complète
+                des réponses ratées avec les bonnes réponses.
+              </p>
+            </div>
+          </section>
+
+          <article id="question-panel" class="question-panel" hidden>
             <div class="question-header">
               <div>
                 <p id="question-category" class="question-category"></p>
@@ -93,6 +135,7 @@
               <div class="question-badges">
                 <span id="question-index" class="badge"></span>
                 <span id="question-mode" class="badge badge-muted"></span>
+                <span id="timer-badge" class="badge">6 s</span>
               </div>
             </div>
 
@@ -101,19 +144,53 @@
             <div id="question-feedback" class="feedback" hidden></div>
 
             <div class="question-footer">
-              <button id="prev-question" class="button button-ghost" type="button">
-                Précédent
-              </button>
               <div class="footer-actions">
-                <button id="check-answer" class="button button-secondary" type="button">
-                  Vérifier
+                <button id="skip-question" class="button button-ghost" type="button">
+                  Passer
                 </button>
-                <button id="next-question" class="button button-primary" type="button">
-                  Suivant
+                <button id="submit-answer" class="button button-primary" type="button">
+                  Valider
                 </button>
               </div>
             </div>
           </article>
+
+          <section id="results-panel" class="question-panel results-panel" hidden>
+            <div class="question-header">
+              <div>
+                <p class="question-category">Résultat final</p>
+                <h2 id="results-title">Quiz terminé</h2>
+              </div>
+              <div class="question-badges">
+                <span id="results-status" class="badge"></span>
+                <span id="results-score" class="badge badge-muted"></span>
+              </div>
+            </div>
+
+            <div class="results-grid">
+              <div class="result-card">
+                <p class="status-label">Score</p>
+                <strong id="results-score-large">0 / 0</strong>
+              </div>
+              <div class="result-card">
+                <p class="status-label">Seuil</p>
+                <strong id="results-target">0</strong>
+              </div>
+              <div class="result-card">
+                <p class="status-label">Réponses ratées</p>
+                <strong id="results-missed">0</strong>
+              </div>
+            </div>
+
+            <div class="results-copy">
+              <p id="results-summary"></p>
+            </div>
+
+            <div>
+              <p class="sidebar-label">Corrections</p>
+              <div id="mistakes-list" class="mistakes-list"></div>
+            </div>
+          </section>
 
           <section class="summary-strip" aria-label="Résumé">
             <div>

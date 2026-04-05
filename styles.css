@@ -154,6 +154,40 @@ input {
   gap: 10px;
 }
 
+.mode-picker {
+  display: grid;
+  gap: 12px;
+}
+
+.mode-option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.66);
+  cursor: pointer;
+}
+
+.mode-option input {
+  margin-top: 3px;
+  accent-color: var(--accent);
+}
+
+.mode-option strong,
+.result-card strong {
+  display: block;
+}
+
+.mode-option small {
+  display: block;
+  margin-top: 4px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
 .category-button {
   display: flex;
   justify-content: space-between;
@@ -217,6 +251,14 @@ input {
   border-radius: 32px;
 }
 
+.exam-panel .intro-copy p,
+.results-copy p {
+  margin: 0 0 14px;
+  max-width: 72ch;
+  line-height: 1.75;
+  color: var(--muted);
+}
+
 .question-header,
 .question-footer {
   display: flex;
@@ -253,6 +295,16 @@ input {
 
 .badge-muted {
   background: rgba(201, 42, 61, 0.12);
+  color: #9f2030;
+}
+
+.badge-success {
+  background: rgba(10, 77, 179, 0.14);
+  color: var(--accent-strong);
+}
+
+.badge-danger {
+  background: rgba(201, 42, 61, 0.14);
   color: #9f2030;
 }
 
@@ -335,6 +387,7 @@ input {
 .question-footer {
   margin-top: 28px;
   align-items: center;
+  justify-content: end;
 }
 
 .button {
@@ -386,6 +439,37 @@ input {
 .summary-strip {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   border-radius: 24px;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.result-card,
+.mistake-item {
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.mistakes-list {
+  display: grid;
+  gap: 14px;
+}
+
+.mistake-item p {
+  margin: 8px 0 0;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.mistake-item span {
+  color: var(--ink);
+  font-weight: 700;
 }
 
 code {
@@ -466,7 +550,8 @@ code {
   .app-layout,
   .hero,
   .status-bar,
-  .summary-strip {
+  .summary-strip,
+  .results-grid {
     grid-template-columns: 1fr;
   }
 
