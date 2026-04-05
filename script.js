@@ -1,7 +1,7 @@
 const allQuizQuestions = window.quizQuestions ?? [];
 
 const EXAM_THEME_COUNT = 8;
-const QUESTION_TIME_LIMIT = 6;
+const QUESTION_TIME_LIMIT = 60;
 const EXAM_TOTAL = 40;
 const EXAM_PASS = 32;
 
@@ -208,7 +208,9 @@ function clearTimer() {
 }
 
 function updateTimerBadge() {
-  elements.timerBadge.textContent = `${state.remainingSeconds} s`;
+  const minutes = String(Math.floor(state.remainingSeconds / 60)).padStart(2, "0");
+  const seconds = String(state.remainingSeconds % 60).padStart(2, "0");
+  elements.timerBadge.textContent = `${minutes}:${seconds}`;
 }
 
 function getCorrectAnswersText(question) {
@@ -279,6 +281,7 @@ function showResults() {
   elements.introPanel.hidden = true;
   elements.questionPanel.hidden = true;
   elements.resultsPanel.hidden = false;
+  document.body.classList.remove("quiz-running");
   elements.resultsStatus.textContent = passed ? "Réussi" : "Raté";
   elements.resultsStatus.classList.toggle("badge-success", passed);
   elements.resultsStatus.classList.toggle("badge-danger", !passed);
@@ -368,6 +371,7 @@ function startQuiz() {
   elements.introPanel.hidden = true;
   elements.resultsPanel.hidden = true;
   elements.questionPanel.hidden = false;
+  document.body.classList.add("quiz-running");
   renderCategoryList();
   updateHeaderStats();
   renderQuestion();
@@ -385,6 +389,7 @@ function resetToIntro() {
   elements.questionPanel.hidden = true;
   elements.resultsPanel.hidden = true;
   elements.introPanel.hidden = false;
+  document.body.classList.remove("quiz-running");
   renderCategoryList();
   updateHeaderStats();
 }

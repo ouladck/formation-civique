@@ -231,6 +231,12 @@ input {
   border-radius: 24px;
 }
 
+body.quiz-running .status-bar {
+  position: sticky;
+  top: 12px;
+  z-index: 40;
+}
+
 .progress-track {
   height: 12px;
   border-radius: 999px;
@@ -249,6 +255,10 @@ input {
 .question-panel {
   padding: 32px;
   border-radius: 32px;
+}
+
+body.quiz-running #question-panel {
+  padding-bottom: 132px;
 }
 
 .exam-panel .intro-copy p,
@@ -388,6 +398,20 @@ input {
   margin-top: 28px;
   align-items: center;
   justify-content: end;
+}
+
+.footer-actions-fixed {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  z-index: 45;
+  transform: translateX(-50%);
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 16px 40px rgba(18, 31, 56, 0.16);
+  backdrop-filter: blur(14px);
 }
 
 .button {
@@ -567,6 +591,11 @@ code {
   .question-badges {
     justify-content: start;
   }
+
+  .footer-actions-fixed {
+    width: calc(100% - 28px);
+    justify-content: center;
+  }
 }
 
 @media (max-width: 720px) {
@@ -585,5 +614,17 @@ code {
 
   .hero h1 {
     max-width: 12ch;
+  }
+
+  body.quiz-running .status-bar {
+    top: 8px;
+  }
+
+  .footer-actions-fixed {
+    left: 14px;
+    right: 14px;
+    bottom: 12px;
+    width: auto;
+    transform: none;
   }
 }
