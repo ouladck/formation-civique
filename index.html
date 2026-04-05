@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Formation civique | Questionnaire</title>
+    <meta
+      name="description"
+      content="Questionnaire interactif de formation civique, prêt à publier sur GitHub Pages."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">GitHub Pages</p>
+          <h1>Questionnaire de formation civique</h1>
+          <p class="hero-text">
+            Une interface prête à publier, structurée par thèmes, avec navigation,
+            progression, correction et support des questions à une ou plusieurs bonnes réponses.
+          </p>
+          <div class="hero-actions">
+            <button id="start-over" class="button button-primary" type="button">
+              Recommencer
+            </button>
+            <button id="jump-first-incomplete" class="button button-secondary" type="button">
+              Aller à la suite
+            </button>
+          </div>
+        </div>
+        <div class="hero-meta">
+          <div>
+            <span class="meta-label">Questions</span>
+            <strong id="total-questions">0</strong>
+          </div>
+          <div>
+            <span class="meta-label">Thèmes</span>
+            <strong id="total-categories">0</strong>
+          </div>
+          <div>
+            <span class="meta-label">Corrigées</span>
+            <strong id="ready-questions">0</strong>
+          </div>
+        </div>
+      </header>
+
+      <main class="app-layout">
+        <aside class="sidebar" aria-label="Thèmes du questionnaire">
+          <div class="sidebar-block">
+            <p class="sidebar-label">Thèmes</p>
+            <nav id="category-list" class="category-list"></nav>
+          </div>
+          <div class="sidebar-block sidebar-note">
+            <p class="sidebar-label">État des données</p>
+            <p id="dataset-status">
+              Les questions sont chargées avec 4 réponses placeholders. Remplace-les dans
+              <code>questions.js</code> pour activer la correction réelle.
+            </p>
+          </div>
+        </aside>
+
+        <section class="workspace">
+          <div class="status-bar">
+            <div>
+              <p class="status-label">Progression</p>
+              <strong id="progress-label">0 / 0</strong>
+            </div>
+            <div class="progress-track" aria-hidden="true">
+              <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div>
+              <p class="status-label">Réponses enregistrées</p>
+              <strong id="answered-count">0</strong>
+            </div>
+          </div>
+
+          <article class="question-panel">
+            <div class="question-header">
+              <div>
+                <p id="question-category" class="question-category"></p>
+                <h2 id="question-title"></h2>
+              </div>
+              <div class="question-badges">
+                <span id="question-index" class="badge"></span>
+                <span id="question-mode" class="badge badge-muted"></span>
+              </div>
+            </div>
+
+            <form id="question-form" class="answers" aria-live="polite"></form>
+
+            <div id="question-feedback" class="feedback" hidden></div>
+
+            <div class="question-footer">
+              <button id="prev-question" class="button button-ghost" type="button">
+                Précédent
+              </button>
+              <div class="footer-actions">
+                <button id="check-answer" class="button button-secondary" type="button">
+                  Vérifier
+                </button>
+                <button id="next-question" class="button button-primary" type="button">
+                  Suivant
+                </button>
+              </div>
+            </div>
+          </article>
+
+          <section class="summary-strip" aria-label="Résumé">
+            <div>
+              <p class="status-label">Bonnes réponses</p>
+              <strong id="score-label">0 / 0</strong>
+            </div>
+            <div>
+              <p class="status-label">Questions prêtes à corriger</p>
+              <strong id="configured-label">0</strong>
+            </div>
+            <div>
+              <p class="status-label">Sélections sauvegardées</p>
+              <strong id="saved-label">0</strong>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="questions.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
