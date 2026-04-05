@@ -1,7 +1,5 @@
-const categorySources = [
-  {
-    title: "Principes et valeurs de la République",
-    questions: `
+const rawQuestionSource = `
+Principes et valeurs de la République :
 À quoi correspond la date du 14 juillet ?
 Quel est l’un des symboles de la République française ?
 Le principe d’égalité signifie que :
@@ -39,11 +37,8 @@ Pourquoi le principe de laïcité doit-il être respecté à l'école ?
 Qu'est-ce que la laïcité ?
 Un enfant peut-il refuser d’aller à l’école pour une raison religieuse ?
 Une personne a-t-elle le droit de ne pas croire en une religion ?
-    `,
-  },
-  {
-    title: "Système institutionnel et politique",
-    questions: `
+
+Système institutionnel et politique :
 Qui nomme le Premier ministre ?
 Le Parlement est composé :
 Qu'est-ce que le pouvoir exécutif ? Le pouvoir :
@@ -90,11 +85,8 @@ Quel pays est un pays fondateur de l'Union européenne ?
 Quelle est la monnaie utilisée en France ?
 Qui élit les députés européens ?
 Quand célèbre-t-on la journée de l'Europe ?
-    `,
-  },
-  {
-    title: "Droits et devoirs",
-    questions: `
+
+Droits et devoirs :
 Comment s’appelle la Constitution actuelle de la France ?
 Comment s'appelle le texte qui énonce les droits et devoirs des personnes résidant en France ?
 Concernant les droits individuels, quelle proposition est correcte ?
@@ -125,11 +117,8 @@ Déposer une machine à laver cassée sur le trottoir est :
 En quoi consiste la traite des êtres humains ?
 Que doit faire une victime de violences ?
 Quelle est l'infraction la plus grave ?
-    `,
-  },
-  {
-    title: "Histoire géographie et culture",
-    questions: `
+
+Histoire géographie et culture :
 En quelle année a débuté la Révolution française ?
 Qui était Napoléon Ier ?
 Lequel de ces personnages historiques est français ?
@@ -177,11 +166,8 @@ Qui était Jean de la Fontaine ?
 Quel écrivain est français ?
 Dans quelle ville se trouve la tour Eiffel ?
 Quand célèbre-t-on Noël ?
-    `,
-  },
-  {
-    title: "Vivre dans la société française",
-    questions: `
+
+Vivre dans la société française :
 Quel numéro d'urgence permet d'appeler le SAMU ?
 Quel numéro d'urgence permet d'appeler les pompiers ?
 Après avoir obtenu le permis de conduire, que faut-il faire pour pouvoir conduire sa voiture ?
@@ -213,23 +199,33 @@ Dans quels établissements scolaires vont les élèves après l'école élément
 Pour qui l'école est elle obligatoire ?
 Un enfant inscrit à l'école :
 Les enfants qui ne parlent pas français :
-    `,
-  },
-];
+`;
 
 const questionOverrides = {
-  // Exemple de configuration réelle :
+  // Exemple :
   // "À quoi correspond la date du 14 juillet ?": {
   //   choices: [
   //     "À la prise de la Bastille en 1789",
-  //     "À la déclaration universelle des droits de l'homme",
-  //     "À la création de l'euro",
+  //     "À l'abolition de la monarchie",
+  //     "À la signature du traité de Rome",
   //     "À l'élection du président",
   //   ],
   //   correctAnswers: [0],
-  //   explanation: "Le 14 juillet renvoie à la fête nationale française.",
+  //   explanation: "Le 14 juillet commémore la fête nationale française.",
   // },
 };
+
+function parseCategorySources(source) {
+  return source
+    .trim()
+    .split(/\n\s*\n/)
+    .map((block) => block.split("\n").map((line) => line.trim()).filter(Boolean))
+    .filter((lines) => lines.length > 1)
+    .map(([titleLine, ...questionLines]) => ({
+      title: titleLine.replace(/\s*:\s*$/, ""),
+      questions: questionLines.filter((line) => line !== "Ministère"),
+    }));
+}
 
 function makePlaceholderChoices(questionText) {
   return [
@@ -241,31 +237,22 @@ function makePlaceholderChoices(questionText) {
 }
 
 function buildQuestionBank() {
-  const bank = [];
-
-  categorySources.forEach((categorySource, categoryIndex) => {
-    const lines = categorySource.questions
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
-
-    lines.forEach((prompt, questionIndex) => {
+  return parseCategorySources(rawQuestionSource).flatMap((category, categoryIndex) =>
+    category.questions.map((prompt, questionIndex) => {
       const override = questionOverrides[prompt] ?? {};
 
-      bank.push({
+      return {
         id: `q-${categoryIndex + 1}-${questionIndex + 1}`,
-        category: categorySource.title,
+        category: category.title,
         prompt,
         choices: override.choices ?? makePlaceholderChoices(prompt),
         correctAnswers: override.correctAnswers ?? [],
         explanation:
           override.explanation ??
           "Question importée. Remplace les réponses placeholders dans questions.js puis renseigne correctAnswers pour activer la correction.",
-      });
-    });
-  });
-
-  return bank;
+      };
+    })
+  );
 }
 
 window.quizQuestions = buildQuestionBank();
