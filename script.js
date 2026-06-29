@@ -1,7 +1,7 @@
 const allQuizQuestions = window.quizQuestions ?? [];
 
 const EXAM_THEME_COUNT = 8;
-const QUESTION_TIME_LIMIT = 60;
+const QUIZ_TIME_LIMIT = 45 * 60;
 const EXAM_TOTAL = 40;
 const EXAM_PASS = 32;
 
@@ -13,7 +13,7 @@ const state = {
   evaluations: new Map(),
   quizMode: "exam",
   timerId: null,
-  remainingSeconds: QUESTION_TIME_LIMIT,
+  remainingSeconds: QUIZ_TIME_LIMIT,
   started: false,
   finished: false,
 };
@@ -156,10 +156,16 @@ function updateHeaderStats() {
   elements.savedLabel.textContent = String(answeredCount);
   elements.scoreLabel.textContent = `${score.correct} / ${score.total}`;
   elements.progressLabel.textContent =
-    state.started && !state.finished ? `${state.currentIndex + 1} / ${state.activeQuestions.length}` : `0 / ${total}`;
+    state.finished
+      ? `${state.activeQuestions.length} / ${state.activeQuestions.length}`
+      : state.started
+        ? `${state.currentIndex + 1} / ${state.activeQuestions.length}`
+        : `0 / ${total}`;
   elements.progressBar.style.width =
-    state.started && state.activeQuestions.length > 0
-      ? `${((state.currentIndex + (state.finished ? 1 : 0)) / state.activeQuestions.length) * 100}%`
+    state.finished
+      ? "100%"
+      : state.started && state.activeQuestions.length > 0
+        ? `${((state.currentIndex + 1) / state.activeQuestions.length) * 100}%`
       : "0%";
   elements.datasetStatus.textContent = `${configuredCount} question(s) sont prêtes. Le mode examen prend par défaut 8 questions par thème, soit 40 au total.`;
   elements.passTarget.textContent =
@@ -187,13 +193,13 @@ function renderCategoryList() {
 
 function startTimer() {
   clearTimer();
-  state.remainingSeconds = QUESTION_TIME_LIMIT;
+  state.remainingSeconds = QUIZ_TIME_LIMIT;
   updateTimerBadge();
   state.timerId = window.setInterval(() => {
     state.remainingSeconds -= 1;
     updateTimerBadge();
     if (state.remainingSeconds <= 0) {
-      finalizeQuestion("timeout");
+      finishQuiz("timeout");
     }
   }, 1000);
 }
@@ -273,7 +279,7 @@ function showResults() {
   const passed = score.correct >= target;
   const wrongQuestions = state.activeQuestions.filter((question) => {
     const evaluation = state.evaluations.get(question.id);
-    return evaluation && !evaluation.isCorrect;
+    return !evaluation || !evaluation.isCorrect;
   });
 
   elements.introPanel.hidden = true;
@@ -321,6 +327,16 @@ function showResults() {
 
 function finishQuiz() {
   clearTimer();
+  state.activeQuestions.forEach((question) => {
+    if (!state.evaluations.has(question.id)) {
+      state.evaluations.set(question.id, {
+        selected: [],
+        expected: [...question.correctAnswers].sort((a, b) => a - b),
+        isCorrect: false,
+        reason: "timeout",
+      });
+    }
+  });
   state.finished = true;
   updateHeaderStats();
   showResults();
@@ -330,8 +346,6 @@ function finalizeQuestion(reason = "submit") {
   if (state.finished || !state.started) {
     return;
   }
-
-  clearTimer();
 
   const question = getQuestion(state.currentIndex);
   const selected = [...getSelections(question.id)].sort((a, b) => a - b);
@@ -353,7 +367,6 @@ function finalizeQuestion(reason = "submit") {
   state.currentIndex += 1;
   updateHeaderStats();
   renderQuestion();
-  startTimer();
 }
 
 function startQuiz() {
@@ -382,12 +395,14 @@ function resetToIntro() {
   state.currentIndex = 0;
   state.selections.clear();
   state.evaluations.clear();
+  state.remainingSeconds = QUIZ_TIME_LIMIT;
   state.started = false;
   state.finished = false;
   elements.questionPanel.hidden = true;
   elements.resultsPanel.hidden = true;
   elements.introPanel.hidden = false;
   document.body.classList.remove("quiz-running");
+  updateTimerBadge();
   renderCategoryList();
   updateHeaderStats();
 }
