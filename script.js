@@ -5,8 +5,13 @@ const QUIZ_TIME_LIMIT = 45 * 60;
 const EXAM_TOTAL = 40;
 const EXAM_PASS = 32;
 
+function getQuestionsForLevel(level) {
+  return allQuizQuestions.filter((question) => question.level === level && isConfigured(question));
+}
+
 const state = {
-  allQuestions: allQuizQuestions.filter(isConfigured),
+  level: "CSP",
+  allQuestions: getQuestionsForLevel("CSP"),
   activeQuestions: [],
   currentIndex: 0,
   selections: new Map(),
@@ -43,6 +48,7 @@ const elements = {
   skipButton: document.getElementById("skip-question"),
   restartButton: document.getElementById("start-over"),
   startQuizButton: document.getElementById("start-quiz"),
+  levelPicker: document.getElementById("level-picker"),
   modePicker: document.getElementById("mode-picker"),
   passTarget: document.getElementById("pass-target"),
   resultsTitle: document.getElementById("results-title"),
@@ -167,7 +173,7 @@ function updateHeaderStats() {
       : state.started && state.activeQuestions.length > 0
         ? `${((state.currentIndex + 1) / state.activeQuestions.length) * 100}%`
       : "0%";
-  elements.datasetStatus.textContent = `${configuredCount} question(s) sont prêtes. Le mode examen prend par défaut 8 questions par thème, soit 40 au total.`;
+  elements.datasetStatus.textContent = `${configuredCount} question(s) sont prêtes pour le niveau ${state.level}. Le mode examen prend par défaut 8 questions par thème, soit 40 au total.`;
   elements.passTarget.textContent =
     state.quizMode === "exam"
       ? `Objectif ${EXAM_PASS} / ${EXAM_TOTAL}`
@@ -371,8 +377,11 @@ function finalizeQuestion(reason = "submit") {
 
 function startQuiz() {
   clearTimer();
+  state.level =
+    elements.levelPicker.querySelector('input[name="quiz-level"]:checked')?.value ?? "CSP";
   state.quizMode =
     elements.modePicker.querySelector('input[name="quiz-mode"]:checked')?.value ?? "exam";
+  state.allQuestions = getQuestionsForLevel(state.level);
   state.activeQuestions = selectQuestionsByMode(state.quizMode);
   state.currentIndex = 0;
   state.selections.clear();
@@ -391,6 +400,9 @@ function startQuiz() {
 
 function resetToIntro() {
   clearTimer();
+  state.level =
+    elements.levelPicker.querySelector('input[name="quiz-level"]:checked')?.value ?? "CSP";
+  state.allQuestions = getQuestionsForLevel(state.level);
   state.activeQuestions = [];
   state.currentIndex = 0;
   state.selections.clear();
@@ -432,6 +444,10 @@ elements.modePicker.addEventListener("change", () => {
   state.quizMode =
     elements.modePicker.querySelector('input[name="quiz-mode"]:checked')?.value ?? "exam";
   renderIntro();
+});
+
+elements.levelPicker.addEventListener("change", () => {
+  resetToIntro();
 });
 
 resetToIntro();

@@ -31,16 +31,22 @@ function sanitizeQuestions(questions) {
   return questions.map((question) => question.trim()).filter(Boolean);
 }
 
+function getQuestionOverride(level, prompt) {
+  return questionOverrides[`${level}::${prompt}`] ?? questionOverrides[prompt] ?? {};
+}
+
 function buildQuestionBank() {
   return themeSources.flatMap((theme, categoryIndex) =>
     sanitizeQuestions(theme.questions).map((prompt, questionIndex) => {
-      const override = questionOverrides[prompt] ?? {};
+      const level = theme.level ?? "CSP";
+      const override = getQuestionOverride(level, prompt);
       const baseChoices = override.choices ?? makePlaceholderChoices(prompt);
       const baseCorrectAnswers = override.correctAnswers ?? [];
       const shuffled = shuffleQuestionChoices(baseChoices, baseCorrectAnswers);
 
       return {
-        id: `q-${categoryIndex + 1}-${questionIndex + 1}`,
+        id: `${level.toLowerCase()}-q-${categoryIndex + 1}-${questionIndex + 1}`,
+        level,
         category: theme.title,
         prompt,
         choices: shuffled.choices,

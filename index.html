@@ -57,6 +57,25 @@
       <main class="app-layout">
         <aside class="sidebar" aria-label="Thèmes du questionnaire">
           <div class="sidebar-block">
+            <p class="sidebar-label">Niveau d'examen</p>
+            <div class="mode-picker" id="level-picker">
+              <label class="mode-option">
+                <input type="radio" name="quiz-level" value="CSP" checked />
+                <span>
+                  <strong>Carte de séjour pluriannuelle</strong>
+                  <small>Niveau CSP</small>
+                </span>
+              </label>
+              <label class="mode-option">
+                <input type="radio" name="quiz-level" value="CR" />
+                <span>
+                  <strong>Carte de résident</strong>
+                  <small>Niveau CR</small>
+                </span>
+              </label>
+            </div>
+          </div>
+          <div class="sidebar-block">
             <p class="sidebar-label">Mode de quiz</p>
             <div class="mode-picker" id="mode-picker">
               <label class="mode-option">
@@ -217,11 +236,13 @@
     <script src="data/themes/droits-et-devoirs.js"></script>
     <script src="data/themes/histoire-geographie-culture.js"></script>
     <script src="data/themes/vivre-en-france.js"></script>
+    <script src="data/themes/cr.js"></script>
     <script src="data/overrides/principes-et-valeurs.js"></script>
     <script src="data/overrides/systeme-institutionnel.js"></script>
     <script src="data/overrides/droits-et-devoirs.js"></script>
     <script src="data/overrides/histoire-geographie-culture.js"></script>
     <script src="data/overrides/vivre-en-france.js"></script>
+    <script src="data/overrides/cr.js"></script>
     <script src="questions.js"></script>
     <script src="script.js"></script>
   </body>
