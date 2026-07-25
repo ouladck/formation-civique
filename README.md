@@ -18,6 +18,20 @@ Site statique prêt pour GitHub Pages.
 3. choisir la branche de publication puis `/ (root)`
 4. enregistrer
 
+## SEO et Google Analytics
+
+Le SEO est configuré avec les balises de référencement, les cartes de partage, les données structurées, `robots.txt` et `sitemap.xml`. Les URL canoniques sont prévues pour la publication GitHub Pages du dépôt : `https://ouladck.github.io/formation-civique/`.
+
+Pour activer Google Analytics 4, renseigner l'identifiant de mesure de la propriété (`G-...`) dans `analytics-config.js` :
+
+```js
+window.siteConfig = {
+  googleAnalyticsMeasurementId: "G-XXXXXXXXXX",
+};
+```
+
+La balise Analytics n'est chargée qu'après le consentement explicite de la personne qui visite le site. Le consentement peut être retiré depuis la page « À propos et sources ».
+
 ## Compléter les réponses
 
 Les questions sont réparties par thème dans `data/themes/`.

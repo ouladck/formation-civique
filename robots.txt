@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ouladck.github.io/formation-civique/sitemap.xml
